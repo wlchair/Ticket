@@ -12,7 +12,7 @@ var requestProtocol = "http://",
         departments: ["牙科副主任医师", "牙科普通门诊"]
     },
     signatureValue, Timestamp,
-    intervalTime = 10;
+    intervalTime = 100;
 //["内科普通门诊"]
 //
 // function getCookie(key) {
