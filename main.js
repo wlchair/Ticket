@@ -6,13 +6,13 @@ var requestProtocol = "http://",
     x = 0,
     isgetTicket = false,
     customer = {
-        aptDate: "2016-09-30",
+        aptDate: "2016-12-06",
         deptCode: "28",
-        accessKeyId: "29b49a5edf5ddd619a67a7e4a6578d0875e794490069848ce4fa938ce39ed724",
-        departments: ["牙科副主任医师","牙科普通门诊"]
+        accessKeyId: "0aa93bc95191981130a1428cb97ef0f52b2a1995379dcb99473352d814cb4b2e",
+        departments: ["牙科副主任医师", "牙科普通门诊"]
     },
     signatureValue, Timestamp,
-    intervalTime = 1000;
+    intervalTime = 10;
 //["内科普通门诊"]
 //
 // function getCookie(key) {
@@ -23,6 +23,73 @@ var requestProtocol = "http://",
 //         return null
 //     }
 // }
+
+
+
+function first() {
+    var d = jQuery.Deferred(),
+        params = {
+            AptDate: customer.aptDate,
+            DeptCode: customer.deptCode
+        },
+        paramslist, requestAction = "GetAppointmentSource",
+        requestUid = "108";
+    Timestamp = formatDate(new Date());
+    signatureValue = buildSHA({
+        requestAction: requestAction,
+        Timestamp: Timestamp,
+        params: params
+    });
+    paramslist = {
+        uid: requestUid,
+        accessKeyId: customer.accessKeyId,
+        action: requestAction,
+        params: JSON.stringify(params),
+        timestamp: Timestamp,
+        signature: signatureValue
+    };
+    $.ajax({
+        url: requestProtocol + basePath + actionPath,
+        data: $.param(paramslist, true),
+        type: "post",
+        success: function(result) {
+            var ableTickets = [];
+            if (result.data && result.data.length) {
+                var rData = result.data,
+                    len = rData.length,
+                    i, j, departments = customer.departments,
+                    dlen = departments.length;
+                for (i = len - 1; i >= 0; i--) {
+                    for (j = dlen - 1; j >= 0; j--) {
+                        if (rData[i].SpecName == departments[j] && rData[i].ValidNumber != 0) {
+                            ableTickets.push(rData[i].SourceSeq)
+                        }
+                    }
+                }
+            }
+            if (ableTickets.length) {
+                d.resolve(ableTickets);
+                console.info("get tickets list");
+            }
+        }
+    });
+    return d.promise()
+};
+$.when(first()).then(function(tickets) {
+    var len = tickets.length,
+        i, timing;
+    timing = setInterval(function() {
+        x++;
+        if (x > intervalTime || isgetTicket) {
+            clearInterval(timing);
+        }
+        for (i = len - 1; i >= 0; i--) {
+            lockTicket(tickets[i]);
+        }
+    }, 100);
+
+});
+
 
 function formatDate(date) {
     var offset = date.getTimezoneOffset(),
@@ -69,113 +136,45 @@ function buildSHA(cfg) {
     signatureArray.push(httpMethod, basePath, actionPath, "accessKeyId=" + customer.accessKeyId + "&" + "action=" + cfg.requestAction + "&" + "params=" + encodeURIComponent(JSON.stringify(cfg.params, true)) + "&" + "timestamp=" + encodeURIComponent(cfg.Timestamp), secretCode);
     return SHA256(signatureArray.join(";"))
 }
-function first() {
-    var d = jQuery.Deferred(),
+
+function lockTicket(currentTicket) {
+    var requestAction = "LockAppointmentSource",
         params = {
-            AptDate: customer.aptDate,
-            DeptCode: customer.deptCode
-        },
-        paramslist, requestAction = "GetAppointmentSource",
-        requestUid = "108";
+            aptVisitDate: customer.aptDate,
+            contactIDCardNo: "110222198801142035",
+            contactName: "吴雷",
+            contactPhone: "13811339645",
+            ptBirthDate: "2013-07-03",
+            ptCardId: "0008798897",
+            ptGender: "0",
+            ptIDCardNo: "110113201307032036",
+            ptMedId: "0009063766",
+            ptName: "吴宇浩",
+            sourceSeq: currentTicket
+        };
     Timestamp = formatDate(new Date());
     signatureValue = buildSHA({
         requestAction: requestAction,
         Timestamp: Timestamp,
         params: params
     });
-    paramslist = {
-        uid: requestUid,
+    var paramslist = {
+        uid: "106",
         accessKeyId: customer.accessKeyId,
         action: requestAction,
         params: JSON.stringify(params),
+        signature: signatureValue,
         timestamp: Timestamp,
-        signature: signatureValue
     };
     $.ajax({
         url: requestProtocol + basePath + actionPath,
-        data: $.param(paramslist, true),
         type: "post",
-        success: function(result) {
-            var ableTickets = [];
-            if (result.data && result.data.length) {
-                var rData = result.data,
-                    len = rData.length,
-                    i, j, departments = customer.departments,
-                    dlen = departments.length;
-                for (i = len - 1; i >= 0; i--) {
-                    for (j = dlen - 1; j >= 0; j--) {
-                        if (rData[i].SpecName == departments[j]) {
-                            ableTickets.push(rData[i].SourceSeq)
-                        }
-                    }
-                }
-            }
-            if (ableTickets.length) {
-                d.resolve(ableTickets);
-            } else {
-                console.info("ticket source none");
+        data: $.param(paramslist, true),
+        success: function(data) {
+            if (data.code == "000000") {
+                isgetTicket = true;
+                console.log("ticket:success");
             }
         }
     });
-    return d.promise()
-};
-var timing = setInterval(function() {
-    x++;
-    if (x > intervalTime || isgetTicket) {
-        clearInterval(timing);
-    }
-    $.when(first()).then(function(tickets) {
-        var len = tickets.length,
-            i;
-        for (i = len - 1; i >= 0; i--) {
-            lockTicket(tickets[i]);
-        }
-
-        function lockTicket(currentTicket) {
-            var requestAction = "LockAppointmentSource",
-                params = {
-                    aptVisitDate: customer.aptDate,
-                    contactIDCardNo: "110222198801142035",
-                    contactName: "吴雷",
-                    contactPhone: "13811339645",
-                    ptBirthDate: "2013-07-03",
-                    ptCardId: "0008798897",
-                    ptGender: "0",
-                    ptIDCardNo: "110113201307032036",
-                    ptMedId: "0009063766",
-                    ptName: "吴宇浩",
-                    sourceSeq: currentTicket
-                };
-            Timestamp = formatDate(new Date());
-            signatureValue = buildSHA({
-                requestAction: requestAction,
-                Timestamp: Timestamp,
-                params: params
-            });
-            var paramslist = {
-                uid: "106",
-                accessKeyId: customer.accessKeyId,
-                action: requestAction,
-                params: JSON.stringify(params),
-                signature: signatureValue,
-                timestamp: Timestamp,
-            };
-            if(isgetTicket){
-                return;
-            }
-            $.ajax({
-                url: requestProtocol + basePath + actionPath,
-                type: "post",
-                data: $.param(paramslist, true),
-                success: function(data) {
-                    if(data.code == "000000"){
-                        isgetTicket = true;
-                        console.log("ticket:success");
-                    }
-                    console.log(x);
-                }
-            });
-        }
-    })
-}, 10);
-timing;
+}
