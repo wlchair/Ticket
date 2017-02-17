@@ -5,14 +5,43 @@ var requestProtocol = "http://",
     secretCode = "1111",
     x = 0,
     isgetTicket = false,
+    // customer = {
+    //     aptDate: "2017-02-24",
+    //     deptCode: "28",
+    //     accessKeyId: "7397516fae88673149f5c5208188e04c204a5341074b6b25316595a31e5a6885",
+    //     departments: ["牙科副主任医师", "牙科普通门诊"]
+    // },
+    // patientInfo = {
+    //     contactIDCardNo: "110222198801142035",
+    //     contactName: "吴雷",
+    //     contactPhone: "13811339645",
+    //     ptBirthDate: "2013-07-03",
+    //     ptCardId: "0008798897",
+    //     ptGender: "0",
+    //     ptIDCardNo: "110113201307032036",
+    //     ptMedId: "0009063766",
+    //     ptName: "吴宇浩"
+    // },
     customer = {
-        aptDate: "2016-12-06",
-        deptCode: "28",
-        accessKeyId: "0aa93bc95191981130a1428cb97ef0f52b2a1995379dcb99473352d814cb4b2e",
-        departments: ["牙科副主任医师", "牙科普通门诊"]
+        aptDate: "2017-02-24",
+        deptCode: "27",
+        accessKeyId: "108fabeee5ff4dcf90d7dc6cbe624c323f7a6e82f010dd470d55572be1514bca",
+        departments: ["眼科综合普通门诊","眼科综合主任医师","眼科综合副主任医师"]
+    },
+    patientInfo = {
+        contactIDCardNo: "110222198105314518",
+        contactName: "张伟",
+        contactPhone: "18511985198",
+        ptBirthDate: "2011-08-31",
+        ptCardId: "",
+        ptGender: "0",
+        ptIDCardNo: "110113201108314559",
+        ptMedId: "",
+        ptName: "张英杰"
     },
     signatureValue, Timestamp,
     intervalTime = 100;
+    
 //["内科普通门诊"]
 //
 // function getCookie(key) {
@@ -141,15 +170,15 @@ function lockTicket(currentTicket) {
     var requestAction = "LockAppointmentSource",
         params = {
             aptVisitDate: customer.aptDate,
-            contactIDCardNo: "110222198801142035",
-            contactName: "吴雷",
-            contactPhone: "13811339645",
-            ptBirthDate: "2013-07-03",
-            ptCardId: "0008798897",
-            ptGender: "0",
-            ptIDCardNo: "110113201307032036",
-            ptMedId: "0009063766",
-            ptName: "吴宇浩",
+            contactIDCardNo: patientInfo.contactIDCardNo,
+            contactName: patientInfo.contactName,
+            contactPhone: patientInfo.contactPhone,
+            ptBirthDate: patientInfo.ptBirthDate,
+            ptCardId: patientInfo.ptCardId,
+            ptGender: patientInfo.ptGender,
+            ptIDCardNo: patientInfo.ptIDCardNo,
+            ptMedId: patientInfo.ptMedId,
+            ptName: patientInfo.ptName,
             sourceSeq: currentTicket
         };
     Timestamp = formatDate(new Date());
