@@ -23,25 +23,25 @@ var requestProtocol = "http://",
     //     ptName: "吴宇浩"
     // },
     customer = {
-        aptDate: "2017-02-24",
+        aptDate: "2017-02-28",
         deptCode: "27",
-        accessKeyId: "108fabeee5ff4dcf90d7dc6cbe624c323f7a6e82f010dd470d55572be1514bca",
-        departments: ["眼科综合普通门诊","眼科综合主任医师","眼科综合副主任医师"]
+        accessKeyId: "7f081449fa7eeab2b098c3147766ae2ebc47d21562cb114cff1d42d061c2e76e",
+        departments: ["眼科综合普通门诊", "眼科综合主任医师", "眼科综合副主任医师", "眼肌及神经眼科特级专家"]
     },
     patientInfo = {
         contactIDCardNo: "110222198105314518",
         contactName: "张伟",
         contactPhone: "18511985198",
         ptBirthDate: "2011-08-31",
-        ptCardId: "",
+        ptCardId: "0009188733",
         ptGender: "0",
         ptIDCardNo: "110113201108314559",
-        ptMedId: "",
+        ptMedId: "0009453508",
         ptName: "张英杰"
     },
     signatureValue, Timestamp,
     intervalTime = 100;
-    
+
 //["内科普通门诊"]
 //
 // function getCookie(key) {
@@ -99,6 +99,8 @@ function first() {
             if (ableTickets.length) {
                 d.resolve(ableTickets);
                 console.info("get tickets list");
+            }else{
+                console.info("none tickets list");
             }
         }
     });
